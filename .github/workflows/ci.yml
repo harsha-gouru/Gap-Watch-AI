@@ -1,0 +1,52 @@
+name: GapWatch CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' # Using a specific version
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: Run tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd) 
+          pytest
+
+      # TODO: Add steps for installing GapWatch and its dependencies once packaging is set up.
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     # Assuming gapwatch will be installable via pip eventually
+      #     # pip install .  # If pyproject.toml is set up for local install
+      #     # Or if it becomes a package on PyPI:
+      #     # pip install gapwatch 
+      #     # If gapwatch relies on external libraries not part of its own package:
+      #     # pip install -r requirements.txt # (if a requirements.txt is created for gapwatch's deps)
+
+      - name: GapWatch CI Self-Scan
+        run: |
+          echo "Running GapWatch on itself (simulated operations)..."
+          # The PYTHONPATH should be set by the "Run tests" step if it runs before this,
+          # or cli.py's own sys.path modification might handle imports.
+          # For explicit safety in this step if run independently:
+          # export PYTHONPATH=${PYTHONPATH}:$(pwd)
+          python gapwatch/cli.py ci --quantize int8 --notify
+        # Note: Real quantization/model paths would be needed for full non-simulated functionality.
+        # For now, the CLI's 'ci' command uses simulated/dummy paths and operations internally.
+
+# TODO: Finalize GapWatch CLI call once implemented. (This is now closer to final)
+# TODO: Add comprehensive steps for installing GapWatch and its dependencies.
+# TODO: Consider adding linting and testing steps for the GapWatch library itself.
+# TODO: Define actual tests for replay, energy, and edgeguard modules.
